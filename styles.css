@@ -772,3 +772,28 @@ body {
         width: auto;
     }
 }
+
+/* WhatsApp Button */
+.whatsapp-btn {
+    background-color: #25D366;
+    color: white;
+    border-color: #25D366;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.whatsapp-btn:hover {
+    background-color: #128C7E;
+    border-color: #128C7E;
+    color: white;
+}
+
+.whatsapp-icon {
+    display: flex;
+    align-items: center;
+}
+
+.whatsapp-text {
+    font-weight: 500;
+}

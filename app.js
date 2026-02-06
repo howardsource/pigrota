@@ -87,6 +87,8 @@ function setupEventListeners() {
     document.getElementById('nextBtn').addEventListener('click', () => navigate(1));
     document.getElementById('todayBtn').addEventListener('click', goToToday);
     document.getElementById('pdfBtn').addEventListener('click', generatePDF);
+    const whatsappBtn = document.getElementById('whatsappBtn');
+    if (whatsappBtn) whatsappBtn.addEventListener('click', generateWhatsAppLink);
     
     // Forms
     document.getElementById('shiftForm').addEventListener('submit', handleShiftSubmit);
@@ -1227,4 +1229,53 @@ function generatePDF() {
     // Open PDF
     const blob = doc.output('blob');
     window.open(URL.createObjectURL(blob), '_blank');
+}
+
+function generateWhatsAppLink() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    
+    let message = `*The Blue Pig Volunteer Rota - Unfilled Shifts for ${currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}*\n\n`;
+    let hasUnfilled = false;
+
+    for (let d = 1; d <= lastDay; d++) {
+        const date = new Date(year, month, d);
+        const dateStr = formatDateISO(date);
+        
+        if (isPast(dateStr)) continue;
+
+        const regularUnfilled = getUnfilledShifts(dateStr);
+        const dayShifts = getShiftsForDate(dateStr);
+        const dbUnfilled = dayShifts.filter(s => !s.volunteer_name); 
+
+        let needed = [];
+        
+        regularUnfilled.forEach(u => {
+             needed.push(`${u.role} (${u.label})`);
+        });
+        
+        dbUnfilled.forEach(s => {
+             const label = SHIFT_LABELS[s.shift_type] || `${s.custom_start_time}-${s.custom_end_time}`;
+             needed.push(`${s.subtitle} (${label})`);
+        });
+
+        if (needed.length > 0) {
+            hasUnfilled = true;
+            const dayName = date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+            message += `*${dayName}*\n`;
+            needed.forEach(n => message += `- ${n}\n`);
+            message += `\n`;
+        }
+    }
+
+    if (!hasUnfilled) {
+        alert('No future unfilled shifts found for this month!');
+        return;
+    }
+    
+    message += `Please reply if you can cover any of these!`;
+    
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
 }
