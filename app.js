@@ -860,6 +860,7 @@ function openShiftModal(dateStr, shiftId = null, defaultType = null, defaultRole
     
     const roleMap = {
         'Bar Staff': 'bar-staff',
+        'Bar Help': 'bar-help',
         'Line Cleaning': 'line-cleaning',
         'Glass Collecting': 'glass-collecting'
     };
@@ -944,6 +945,7 @@ async function handleShiftSubmit(e) {
     
     // Always process the role/subtitle, even if unfilled
     if (roleType === 'bar-staff') subtitle = 'Bar Staff';
+    else if (roleType === 'bar-help') subtitle = 'Bar Help';
     else if (roleType === 'line-cleaning') subtitle = 'Line Cleaning';
     else if (roleType === 'glass-collecting') subtitle = 'Glass Collecting';
     else if (roleType === 'custom') subtitle = document.getElementById('customRole').value;

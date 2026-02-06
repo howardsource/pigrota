@@ -1,0 +1,19 @@
+{
+  "name": "pigrota2",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "scss": "sass --watch style.scss:styles.css",
+    "dev": "concurrently \"npm run scss\" \"browser-sync start --proxy 'howardair.local/pigrota2' --files '*.php, *.css, *.js' --no-notify\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "browser-sync": "^3.0.4",
+    "concurrently": "^9.2.1",
+    "sass": "^1.97.3"
+  }
+}

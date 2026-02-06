@@ -63,6 +63,7 @@ export function AddShiftForm({ onAddShift, selectedDate, compact = false }: AddS
   const getRoleValue = () => {
     if (roleType === "custom") return customRole.trim() || undefined
     if (roleType === "bar-staff") return "Bar Staff"
+    if (roleType === "bar-help") return "Bar Help"
     if (roleType === "line-cleaning") return "Line Cleaning"
     return undefined
   }
@@ -156,6 +157,7 @@ export function AddShiftForm({ onAddShift, selectedDate, compact = false }: AddS
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="bar-staff">Bar Staff</SelectItem>
+                    <SelectItem value="bar-help">Bar Help</SelectItem>
                     <SelectItem value="line-cleaning">Line Cleaning</SelectItem>
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>

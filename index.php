@@ -15,7 +15,8 @@
                 <img src="bluepig.png" alt="The Blue Pig" class="header-logo">
                 <div class="header-titles">
                     <h1>The Blue Pig</h1>
-                    <h2>Volunteer Rota</h2>
+                    <h2>Volunteer Rota test</h2>
+                    
                 </div>
             </div>
 
@@ -95,6 +96,7 @@
                     <label for="roleType">Role</label>
                     <select id="roleType" name="role_type">
                         <option value="bar-staff">Bar Staff</option>
+                        <option value="bar-help">Bar Help</option>
                         <option value="line-cleaning">Line Cleaning</option>
                         <option value="custom">Custom</option>
                     </select>
