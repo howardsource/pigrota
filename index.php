@@ -15,7 +15,7 @@
                 <img src="bluepig.png" alt="The Blue Pig" class="header-logo">
                 <div class="header-titles">
                     <h1>The Blue Pig</h1>
-                    <h2>Volunteer Rota test</h2>
+                    <h2>Volunteer Rota</h2>
                     
                 </div>
             </div>
