@@ -148,6 +148,33 @@ switch ($action) {
         }
         break;
         
+    case 'update_event':
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            if (!$data || !isset($data['id'])) {
+                throw new Exception('Invalid JSON data or missing ID');
+            }
+            
+            $stmt = $db->prepare("UPDATE events SET title = ?, date = ?, start_time = ?, end_time = ? WHERE id = ?");
+            $result = $stmt->execute([
+                $data['title'],
+                $data['date'],
+                $data['start_time'],
+                $data['end_time'],
+                $data['id']
+            ]);
+            
+            if (!$result) {
+                throw new Exception('Database update failed');
+            }
+            
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        break;
+        
     case 'delete_event':
         try {
             $id = $_GET['id'] ?? $_POST['id'] ?? 0;

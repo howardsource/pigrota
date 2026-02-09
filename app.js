@@ -265,6 +265,10 @@ function isPast(dateStr) {
     return new Date(dateStr) < today;
 }
 
+function isAdmin() {
+    return new URLSearchParams(window.location.search).get('admin') === 'true';
+}
+
 function isRegularDay(dateStr) {
     const day = new Date(dateStr).getDay();
     return day in REGULAR_HOURS;
@@ -478,10 +482,11 @@ function renderListView() {
         const dayEvents = getEventsForDate(dateStr);
         const regular = isRegularDay(dateStr);
         const today = isToday(dateStr);
+        const isAdm = isAdmin();
 
         // Group unfilled shifts
-        const dbUnfilled = past ? [] : allShifts.filter(s => !s.volunteer_name);
-        const regularUnfilled = past ? [] : getUnfilledShifts(dateStr);
+        const dbUnfilled = (past && !isAdm) ? [] : allShifts.filter(s => !s.volunteer_name);
+        const regularUnfilled = (past && !isAdm) ? [] : getUnfilledShifts(dateStr);
         
         const allUnfilledItems = [
             ...dbUnfilled.map(s => ({ ...s, val: getShiftSortValue(s) })),
@@ -512,12 +517,10 @@ function renderListView() {
                     ${dayShifts.length ? `<div class="shifts-grid">${dayShifts.map(s => renderShiftCard(s, past)).join('')}</div>` : ''}
                     ${!past && groupedUnfilled.length ? `<div class="shifts-grid">${groupedUnfilled.map(u => renderShiftCard(u, false)).join('')}</div>` : ''}
                     ${!dayShifts.length && !dayEvents.length && !groupedUnfilled.length ? '<div class="empty-state">No shifts or events</div>' : ''}
-                    ${!past ? `
-                        <div style="display:flex;gap:8px;margin-top:12px;">
-                            <button class="btn btn-secondary btn-sm" onclick="openShiftModal('${dateStr}')">+ Add Shift</button>
-                            <button class="btn btn-secondary btn-sm" onclick="openEventModal('${dateStr}')">+ Add Event</button>
-                        </div>
-                    ` : ''}
+                    <div style="display:flex;gap:8px;margin-top:12px;">
+                        ${(!past || isAdm) ? `<button class="btn btn-secondary btn-sm" onclick="openShiftModal('${dateStr}')">+ Add Shift</button>` : ''}
+                        ${isAdm ? `<button class="btn btn-secondary btn-sm" onclick="openEventModal('${dateStr}')">+ Add Event</button>` : ''}
+                    </div>
                 </div>
             </div>
         `;
@@ -538,10 +541,11 @@ function renderWeekView() {
                 const dayEvents = getEventsForDate(dateStr);
                 const regular = isRegularDay(dateStr);
                 const today = isToday(dateStr);
+                const isAdm = isAdmin();
 
                 // Group unfilled shifts
-                const dbUnfilled = past ? [] : allShifts.filter(s => !s.volunteer_name);
-                const regularUnfilled = past ? [] : getUnfilledShifts(dateStr);
+                const dbUnfilled = (past && !isAdm) ? [] : allShifts.filter(s => !s.volunteer_name);
+                const regularUnfilled = (past && !isAdm) ? [] : getUnfilledShifts(dateStr);
                 
                 const allUnfilledItems = [
                     ...dbUnfilled.map(s => ({ ...s, val: getShiftSortValue(s) })),
@@ -572,12 +576,10 @@ function renderWeekView() {
                             ${dayShifts.map(s => renderShiftCard(s, past)).join('')}
                             ${!past ? groupedUnfilled.map(u => renderShiftCard(u, false)).join('') : ''}
                         </div>
-                        ${!past ? `
-                            <div class="day-card-actions">
-                                <button class="btn btn-secondary btn-sm btn-block" onclick="openShiftModal('${dateStr}')">+ Shift</button>
-                                <button class="btn btn-secondary btn-sm btn-block" onclick="openEventModal('${dateStr}')">+ Event</button>
-                            </div>
-                        ` : ''}
+                        <div class="day-card-actions">
+                            ${(!past || isAdm) ? `<button class="btn btn-secondary btn-sm btn-block" onclick="openShiftModal('${dateStr}')">+ Shift</button>` : ''}
+                            ${isAdm ? `<button class="btn btn-secondary btn-sm btn-block" onclick="openEventModal('${dateStr}')">+ Event</button>` : ''}
+                        </div>
                     </div>
                 `;
             }).join('')}
@@ -599,6 +601,7 @@ function renderMonthView() {
                 const past = isPast(dateStr);
                 const regular = isRegularDay(dateStr);
                 const today = isToday(dateStr);
+                const isAdm = isAdmin();
                 
                 const filled = dayShifts.filter(s => s.volunteer_name && s.volunteer_name !== CANCELLED_SHIFT_NAME);
                 const dbUnfilled = dayShifts.filter(s => !s.volunteer_name);
@@ -616,7 +619,7 @@ function renderMonthView() {
                     }))
                 ];
                 
-                const groupedUnfilled = past ? [] : groupUnfilledShifts(allUnfilledItems, dateStr);
+                const groupedUnfilled = (past && !isAdm) ? [] : groupUnfilledShifts(allUnfilledItems, dateStr);
                 const taken = sortShifts(filled);
                 
                 return `
@@ -627,14 +630,14 @@ function renderMonthView() {
                         <div class="month-day-content">
                             ${dayEvents.slice(0,1).map(e => {
                                 const timeLabel = formatTimeRangeCompact(e.start_time, e.end_time);
-                                return `<div class="shift-compact" style="background:rgba(201,162,39,0.15);color:var(--accent);"><span class="name">${e.title} - ${timeLabel}</span></div>`;
+                                return `<div class="shift-compact" onclick="openEventModal('${dateStr}', ${e.id})" style="background:rgba(201,162,39,0.15);color:var(--accent);cursor:pointer;"><span class="name">${e.title} - ${timeLabel}</span></div>`;
                             }).join('')}
                             ${taken.map(s => {
                                 const timeLabel = SHIFT_LABELS[s.shift_type] || formatTimeRangeCompact(s.custom_start_time, s.custom_end_time);
                                 const roleClass = s.subtitle === 'Bar Staff' ? 'bar-staff' : s.subtitle === 'Line Cleaning' ? 'line-cleaning' : '';
                                 return `<div class="shift-compact ${roleClass}" onclick="openShiftModal('${dateStr}', ${s.id})" style="cursor:pointer"><span class="name">${s.volunteer_name} - ${s.subtitle} - ${timeLabel}</span></div>`;
                             }).join('')}
-                            ${!past && groupedUnfilled.length ? `<div style="font-size:8px;color:var(--destructive);">${groupedUnfilled.map(u => {
+                            ${(!past || isAdm) && groupedUnfilled.length ? `<div style="font-size:8px;color:var(--destructive);">${groupedUnfilled.map(u => {
                                 const count = u.count || 1;
                                 const countText = count > 1 ? `(${count})` : '';
                                 let clickAction = '';
@@ -647,10 +650,10 @@ function renderMonthView() {
                                 return `<div style="cursor:pointer;margin-bottom:1px;" ${clickAction}>&#9888; ${countText} ${u.label}${u.subtitle ? ' (' + u.subtitle + ')' : ''}</div>`;
                             }).join('')}</div>` : ''}
                         </div>
-                        ${isCurrentMonth && !past ? `
+                        ${isCurrentMonth ? `
                             <div class="month-day-actions">
-                                <button class="btn btn-ghost btn-xs" onclick="openShiftModal('${dateStr}')">+Shift</button>
-                                <button class="btn btn-ghost btn-xs" onclick="openEventModal('${dateStr}')">+Event</button>
+                                ${(!past || isAdm) ? `<button class="btn btn-ghost btn-xs" onclick="openShiftModal('${dateStr}')">+Shift</button>` : ''}
+                                ${isAdm ? `<button class="btn btn-ghost btn-xs" onclick="openEventModal('${dateStr}')">+Event</button>` : ''}
                             </div>
                         ` : ''}
                     </div>
@@ -730,12 +733,12 @@ function renderShiftCard(shift, locked) {
 
 function renderEventCard(event, locked) {
     return `
-        <div class="event-card">
+        <div class="event-card" onclick="openEventModal('${event.date}', ${event.id})" style="cursor:pointer">
             <div class="event-info">
                 <div class="event-title">&#127775; ${event.title}</div>
                 <div class="event-time">${formatTimeRangeCompact(event.start_time, event.end_time)}</div>
             </div>
-            ${!locked ? `<button class="delete-btn" onclick="deleteEvent(${event.id})">&#10005;</button>` : ''}
+            ${!locked ? `<button class="delete-btn" onclick="event.stopPropagation(); deleteEvent(${event.id})">&#10005;</button>` : ''}
         </div>
     `;
 }
@@ -925,9 +928,41 @@ function closeShiftModal() {
     document.getElementById('shiftModal').classList.remove('active');
 }
 
-function openEventModal(dateStr) {
+function openEventModal(dateStr, eventId = null) {
     document.getElementById('eventDate').value = dateStr;
     document.getElementById('eventForm').reset();
+    document.getElementById('eventDate').value = dateStr;
+    document.getElementById('eventId').value = eventId || '';
+
+    // Update button text
+    const submitBtn = document.getElementById('eventSubmitBtn');
+    if (submitBtn) {
+        submitBtn.textContent = eventId ? 'Update Event' : 'Add Event';
+    }
+
+    // Toggle delete button
+    const deleteBtn = document.getElementById('deleteEventBtn');
+    if (deleteBtn) {
+        if (eventId) {
+            deleteBtn.style.display = 'inline-flex';
+            deleteBtn.onclick = async () => {
+                const success = await deleteEvent(eventId);
+                if (success) closeEventModal();
+            };
+        } else {
+            deleteBtn.style.display = 'none';
+        }
+    }
+
+    if (eventId) {
+        const event = events.find(e => e.id == eventId);
+        if (event) {
+            document.getElementById('eventTitle').value = event.title;
+            document.getElementById('eventStartTime').value = event.start_time;
+            document.getElementById('eventEndTime').value = event.end_time;
+        }
+    }
+
     document.getElementById('eventModal').classList.add('active');
 }
 
@@ -994,6 +1029,8 @@ async function handleShiftSubmit(e) {
 async function handleEventSubmit(e) {
     e.preventDefault();
     
+    const eventId = document.getElementById('eventId').value;
+
     const data = {
         date: document.getElementById('eventDate').value,
         title: document.getElementById('eventTitle').value,
@@ -1001,8 +1038,14 @@ async function handleEventSubmit(e) {
         end_time: document.getElementById('eventEndTime').value
     };
     
+    if (eventId) {
+        data.id = eventId;
+    }
+    
+    const action = eventId ? 'update_event' : 'add_event';
+
     try {
-        const response = await fetch('api.php?action=add_event', {
+        const response = await fetch(`api.php?action=${action}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -1011,14 +1054,14 @@ async function handleEventSubmit(e) {
         const result = await response.json();
         
         if (!response.ok || !result.success) {
-            throw new Error(result.error || 'Failed to add event');
+            throw new Error(result.error || 'Failed to save event');
         }
         
         closeEventModal();
         loadData();
     } catch (error) {
-        console.error('Failed to add event:', error);
-        alert('Error adding event: ' + error.message);
+        console.error('Failed to save event:', error);
+        alert('Error saving event: ' + error.message);
     }
 }
 
@@ -1075,7 +1118,7 @@ async function cancelRegularShift(dateStr, shiftType, role) {
 }
 
 async function deleteEvent(id) {
-    if (!confirm('Remove this event?')) return;
+    if (!confirm('Remove this event?')) return false;
     
     try {
         const response = await fetch(`api.php?action=delete_event&id=${id}`);
@@ -1086,9 +1129,11 @@ async function deleteEvent(id) {
         }
         
         loadData();
+        return true;
     } catch (error) {
         console.error('Failed to delete event:', error);
         alert('Error deleting event: ' + error.message);
+        return false;
     }
 }
 

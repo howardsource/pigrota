@@ -144,6 +144,7 @@
             <h2>Add Event</h2>
             <form id="eventForm">
                 <input type="hidden" id="eventDate" name="date">
+                <input type="hidden" id="eventId" name="id">
                 
                 <div class="form-group">
                     <label for="eventTitle">Event Title *</label>
@@ -162,7 +163,8 @@
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Event</button>
+                    <button type="submit" class="btn btn-primary" id="eventSubmitBtn">Add Event</button>
+                    <button type="button" class="btn btn-danger" id="deleteEventBtn" style="display:none;">Delete</button>
                 </div>
             </form>
         </div>
