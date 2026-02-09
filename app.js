@@ -193,8 +193,21 @@ function getDateRange() {
             endDate: listDateRange.end
         };
     } else if (currentView === 'month') {
-        const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1);
+        
+        // Adjust to start on Monday (0 = Mon, 6 = Sun)
+        let startDayOfWeek = firstDay.getDay();
+        startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+        
+        // Calculate start date of the grid
+        const start = new Date(year, month, 1 - startDayOfWeek);
+        
+        // Calculate end date of the grid (always 42 days total)
+        const end = new Date(start);
+        end.setDate(start.getDate() + 41);
+        
         return {
             startDate: formatDateISO(start),
             endDate: formatDateISO(end)
@@ -630,7 +643,7 @@ function renderMonthView() {
                         <div class="month-day-content">
                             ${dayEvents.slice(0,1).map(e => {
                                 const timeLabel = formatTimeRangeCompact(e.start_time, e.end_time);
-                                return `<div class="shift-compact" onclick="openEventModal('${dateStr}', ${e.id})" style="background:rgba(201,162,39,0.15);color:var(--accent);cursor:pointer;"><span class="name">${e.title} - ${timeLabel}</span></div>`;
+                                return `<div class="shift-compact" ${isAdm ? `onclick="openEventModal('${dateStr}', ${e.id})"` : ''} style="background:rgba(201,162,39,0.15);color:var(--accent);${isAdm ? 'cursor:pointer;' : ''}"><span class="name">${e.title} - ${timeLabel}</span></div>`;
                             }).join('')}
                             ${taken.map(s => {
                                 const timeLabel = SHIFT_LABELS[s.shift_type] || formatTimeRangeCompact(s.custom_start_time, s.custom_end_time);
@@ -732,13 +745,20 @@ function renderShiftCard(shift, locked) {
 }
 
 function renderEventCard(event, locked) {
+    const isAdm = isAdmin();
+    // Only admins can edit events, regardless of whether it's past or future.
+    // So 'locked' (past) is irrelevant for admins here, but relevant for non-admins?
+    // Actually, non-admins can't edit events at all.
+    // So if (!isAdm), it's locked.
+    const canEdit = isAdm;
+
     return `
-        <div class="event-card" onclick="openEventModal('${event.date}', ${event.id})" style="cursor:pointer">
+        <div class="event-card" ${canEdit ? `onclick="openEventModal('${event.date}', ${event.id})"` : ''} style="${canEdit ? 'cursor:pointer' : ''}">
             <div class="event-info">
                 <div class="event-title">&#127775; ${event.title}</div>
                 <div class="event-time">${formatTimeRangeCompact(event.start_time, event.end_time)}</div>
             </div>
-            ${!locked ? `<button class="delete-btn" onclick="event.stopPropagation(); deleteEvent(${event.id})">&#10005;</button>` : ''}
+            ${canEdit ? `<button class="delete-btn" onclick="event.stopPropagation(); deleteEvent(${event.id})">&#10005;</button>` : ''}
         </div>
     `;
 }
