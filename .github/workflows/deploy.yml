@@ -19,7 +19,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         server: ${{ secrets.FTP_SERVER }}
         password: ${{ secrets.FTP_PASSWORD }}
-        remote_path: ${{ secrets.FTP_TARGET_DIR }}
+        remote_path: /rota/
         port: 22
         sftp_only: true
 
