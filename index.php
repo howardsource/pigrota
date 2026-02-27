@@ -172,6 +172,6 @@
         </div>
     </div>
     
-    <script src="app.js?v=<?php echo time(); ?>"></script>
+    <script src="app.js?v=1.2.0"></script>
 </body>
 </html>

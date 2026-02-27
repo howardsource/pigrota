@@ -1,7 +1,10 @@
 /**
  * The Blue Pig - Volunteer Rota
  * JavaScript Application
+ * Version 1.2.0 (TZ Fix)
  */
+
+console.log('App Version 1.2.0 (TZ Fix) Loaded');
 
 // State
 let currentDate = new Date();
@@ -64,6 +67,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateNavControls();
     loadData();
+
+    console.log('PigRota App Version: 1.2.0 (Timezone Fix Applied)');
+    if (isAdmin()) {
+         const versionEl = document.createElement('div');
+         versionEl.style.position = 'fixed';
+         versionEl.style.bottom = '5px';
+         versionEl.style.right = '5px';
+         versionEl.style.fontSize = '10px';
+         versionEl.style.opacity = '0.5';
+         versionEl.style.pointerEvents = 'none';
+         versionEl.innerText = 'v1.2.0 (TZ Fix)';
+         document.body.appendChild(versionEl);
+    }
 });
 
 function setupEventListeners() {
