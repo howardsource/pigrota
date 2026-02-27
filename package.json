@@ -4,7 +4,7 @@
   "main": "app.js",
   "scripts": {
     "scss": "sass --watch style.scss:styles.css",
-    "dev": "concurrently \"npm run scss\" \"browser-sync start --proxy 'howardair.local/pigrota2' --files '*.php, *.css, *.js' --no-notify\"",
+    "dev": "concurrently \"npm run scss\" \"browser-sync start --proxy 'howardair.local' --files '*.php, *.css, *.js' --no-notify\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
