@@ -14,20 +14,12 @@ jobs:
       uses: actions/checkout@v4
 
     - name: 📂 Sync files
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
       with:
-        server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
+        server: ${{ secrets.FTP_SERVER }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: ${{ secrets.FTP_TARGET_DIR }}/
-        protocol: sftp
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/node_modules/**
-          **/files/**
-          **/scripts/**
-          README.txt
-          setup.sql
-          style.scss
+        remote_path: ${{ secrets.FTP_TARGET_DIR }}
+        port: 22
+        sftp_only: true
 
